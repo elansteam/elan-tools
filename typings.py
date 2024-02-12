@@ -20,14 +20,14 @@ class ElanProblemLocalized:
 
 @dataclass
 class ElanProblemStatements:
-    name: str | None # path to name.mdx
-    legend: str | None # path to legend.mdx
     input: str # path to input.mdx
     output: str # path to output.mdx
-    scoring: str | None # path to scoring.mdx
     tests: list[ElanProblemExampleTest]
-    notes: str | None # path to notes.mdx
-    tutorial: str | None # path to tutorial.mdx
+    name: str | None = None # path to name.mdx
+    legend: str | None = None # path to legend.mdx
+    scoring: str | None = None # path to scoring.mdx
+    notes: str | None = None # path to notes.mdx
+    tutorial: str | None = None # path to tutorial.mdx
 
 @dataclass
 class ElanProblemExampleTest:

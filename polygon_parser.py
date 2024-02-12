@@ -30,15 +30,16 @@ def parse_polygon(polygon_dir: str, elan_dir: str):
     statements: dict[str, ElanProblemStatements] = {}
     for language in names.keys():
         os.makedirs(f"{elan_dir}/statements/{language}")
+        original_tests = [
+            test for test in os.listdir(
+                f"{polygon_dir}/statement-sections/{language}"
+            ) if test.startswith("example") and not test.endswith(".a")
+        ]
         tests = [
             ElanProblemExampleTest(
                 input=open(f"{polygon_dir}/statement-sections/{language}/{test}").read().strip(),
                 output=open(f"{polygon_dir}/statement-sections/{language}/{test}.a").read().strip()
-            ) for test in [
-                test for test in os.listdir(
-                    f"{polygon_dir}/statement-sections/{language}"
-                ) if test.startswith("example") and not test.endswith(".a")
-            ]
+            ) for test in original_tests
         ]
         files = [
             "name", "legend", "input", "output", "scoring", "notes", "tutorial"
@@ -48,7 +49,7 @@ def parse_polygon(polygon_dir: str, elan_dir: str):
         ]
         elan_statements_kwargs = {}
         for file in files:
-            if os.path.exists(f"{polygon_dir}/statement-sections/{language}/input.tex"):
+            if os.path.exists(f"{polygon_dir}/statement-sections/{language}/{file}.tex"):
                 shutil.copy(
                     f"{polygon_dir}/statement-sections/{language}/{file}.tex",
                     f"{elan_dir}/statements/{language}/{file}.mdx"
@@ -57,8 +58,14 @@ def parse_polygon(polygon_dir: str, elan_dir: str):
             elif file in required_files:
                 raise InvalidProblem(f"Required statement file not found (bad Polygon archive?): {polygon_dir}/statement-sections/{language}/{file}.tex")
         statements[language] = ElanProblemStatements(
-            **elan_statements_kwargs,
-            tests=tests
+            name=elan_statements_kwargs.get("name", None),
+            legend=elan_statements_kwargs.get("legend", None),
+            input=elan_statements_kwargs.get("input"),
+            output=elan_statements_kwargs.get("output"),
+            scoring=elan_statements_kwargs.get("scoring", None),
+            tests=tests,
+            notes=elan_statements_kwargs.get("notes", None),
+            tutorial=elan_statements_kwargs.get("tutorial", None)
         )
     
     variants: dict[str, ElanProblemLocalized] = {}

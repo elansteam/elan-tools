@@ -1,14 +1,14 @@
-# polygon-to-elan
-Module for converting Polygon problems to Elan format.
+# elan-fs
+Tools for Elan
 
-## Roadmap
+## Roadmap for Polygon parser
 - [x] short name (id)
 - [x] problem name (on multiple languages)
 - [x] time and memory limits
-- [ ] support statements text
+- [x] support statements text
     - [x] multi languages
     - [x] support variate statement sections (legend, notes, tutorial, scoring)
-    - example tests
+    - [x] example tests
 - [ ] validators support
     - [ ] validators
     - [ ] validators tests

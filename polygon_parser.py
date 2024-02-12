@@ -35,12 +35,20 @@ def parse_polygon(polygon_dir: str, elan_dir: str):
                 f"{polygon_dir}/statement-sections/{language}"
             ) if test.startswith("example") and not test.endswith(".a")
         ]
-        tests = [
-            ElanProblemExampleTest(
-                input=open(f"{polygon_dir}/statement-sections/{language}/{test}").read().strip(),
-                output=open(f"{polygon_dir}/statement-sections/{language}/{test}.a").read().strip()
-            ) for test in original_tests
-        ]
+        tests: list[ElanProblemExampleTest] = []
+        os.makedirs(f"{elan_dir}/statements/{language}/examples")
+        for test in original_tests:
+            test_input = f"{polygon_dir}/statement-sections/{language}/{test}"
+            test_output = f"{polygon_dir}/statement-sections/{language}/{test}.a"
+            if not os.path.exists(test_output):
+                raise InvalidProblem(f"Output file not found for test {test_input}")
+            test_num = test.split("example.", maxsplit=1)[-1]
+            shutil.copy(test_input, f"{elan_dir}/statements/{language}/examples/{test_num}")
+            shutil.copy(test_output, f"{elan_dir}/statements/{language}/examples/{test_num}.a")
+            tests.append(ElanProblemExampleTest(
+                input=f"{elan_dir}/statements/{language}/examples/{test_num}",
+                output=f"{elan_dir}/statements/{language}/examples/{test_num}.a"
+            ))
         files = [
             "name", "legend", "input", "output", "scoring", "notes", "tutorial"
         ]

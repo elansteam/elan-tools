@@ -14,3 +14,4 @@ Module for converting Polygon problems to Elan format.
     - [ ] validators tests
 - [ ] checker
 - [ ] base files (testlib.h, built-in checkers, so on)
+- [ ] author solutions

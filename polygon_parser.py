@@ -72,4 +72,5 @@ def parse_polygon(polygon_dir: str, elan_dir: str):
         variants=variants
     )
 
+unzip("./birthday-mex-4.zip", "./problem_polygon")
 print(parse_polygon("./problem_polygon", "./problem1"))

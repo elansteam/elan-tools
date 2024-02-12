@@ -7,7 +7,7 @@ class ElanProblem:
     problem_id: int
     problem_short_name: str
     time_limit: int # milliseconds
-    memory_limit: int # wtf?
+    memory_limit: int # bytes
     variants: dict[str, ElanProblemLocalized]
 
 @dataclass

@@ -2,7 +2,7 @@ import os
 import zipfile
 import shutil
 from xml.dom.minidom import parse, parseString
-from typings import ElanProblem, ElanProblemExampleTest, ElanProblemLocalized, ElanProblemStatements
+from typings import ElanProblem, ElanProblemExampleTest, ElanProblemLocalized, ElanProblemStatements, InvalidProblem
 
 def unzip(path_to_zip_file: str, directory_to_extract: str):
     with zipfile.ZipFile(path_to_zip_file, 'r') as zip_ref:
@@ -27,34 +27,39 @@ def parse_polygon(polygon_dir: str, elan_dir: str):
     
     
     # Parsing statements
-    statements: dict[str, ElanProblemStatements] = {
-        language:
-        ElanProblemStatements(
-            input=f"{elan_dir}/statements/{language}/input.mdx",
-            legend=f"{elan_dir}/statements/{language}/legend.mdx",
-            name=f"{elan_dir}/statements/{language}/name.mdx",
-            output=f"{elan_dir}/statements/{language}/output.mdx",
-            tests=[
-                ElanProblemExampleTest(
-                    input=open(f"{polygon_dir}/statement-sections/{language}/{test}").read().strip(),
-                    output=open(f"{polygon_dir}/statement-sections/{language}/{test}.a").read().strip()
-                ) for test in [
-                    test for test in os.listdir(
-                        f"{polygon_dir}/statement-sections/{language}"
-                    ) if test.startswith("example") and not test.endswith(".a")
-                ]
-            ]
-        ) for language in names.keys()
-    }
-    
-    # copying statements
-    for language in statements.keys():
+    statements: dict[str, ElanProblemStatements] = {}
+    for language in names.keys():
         os.makedirs(f"{elan_dir}/statements/{language}")
-        for file in ["input", "output", "legend", "name"]:
-            shutil.copy(
-                f"{polygon_dir}/statement-sections/{language}/{file}.tex",
-                f"{elan_dir}/statements/{language}/{file}.mdx"
-            )
+        tests = [
+            ElanProblemExampleTest(
+                input=open(f"{polygon_dir}/statement-sections/{language}/{test}").read().strip(),
+                output=open(f"{polygon_dir}/statement-sections/{language}/{test}.a").read().strip()
+            ) for test in [
+                test for test in os.listdir(
+                    f"{polygon_dir}/statement-sections/{language}"
+                ) if test.startswith("example") and not test.endswith(".a")
+            ]
+        ]
+        files = [
+            "name", "legend", "input", "output", "scoring", "notes", "tutorial"
+        ]
+        required_files = [
+            "input", "output"
+        ]
+        elan_statements_kwargs = {}
+        for file in files:
+            if os.path.exists(f"{polygon_dir}/statement-sections/{language}/input.tex"):
+                shutil.copy(
+                    f"{polygon_dir}/statement-sections/{language}/{file}.tex",
+                    f"{elan_dir}/statements/{language}/{file}.mdx"
+                )
+                elan_statements_kwargs[file] = f"{elan_dir}/statements/{language}/{file}.mdx"
+            elif file in required_files:
+                raise InvalidProblem(f"Required statement file not found (bad Polygon archive?): {polygon_dir}/statement-sections/{language}/{file}.tex")
+        statements[language] = ElanProblemStatements(
+            **elan_statements_kwargs,
+            tests=tests
+        )
     
     variants: dict[str, ElanProblemLocalized] = {}
     for language in names.keys():
